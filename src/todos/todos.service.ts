@@ -1,7 +1,8 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { CreateTodoDto } from './dto/create-todo.dto';
 import { UpdateTodoDto } from './dto/update-todo.dto';
-import { PrismaService } from 'src/prisma/prisma.service';
+import { PrismaService } from '../prisma/prisma.service';
+import { isBoolean } from 'class-validator';
 
 @Injectable()
 export class TodosService {
@@ -32,11 +33,11 @@ export class TodosService {
   }
 
   async update(id: number, updateTodoDto: UpdateTodoDto) {
-    await this.findOne(id);
+    const todo = await this.findOne(id);
 
-    let finished: Date | null = null;
-    if (updateTodoDto?.isDone) {
-      finished = new Date();
+    let finished: Date | null = todo?.finished;
+    if (isBoolean(updateTodoDto?.isDone)) {
+      finished = updateTodoDto?.isDone ? new Date() : null;
     }
 
     await this.prisma.todo.update({
