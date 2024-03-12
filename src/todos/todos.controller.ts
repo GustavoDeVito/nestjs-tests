@@ -13,19 +13,25 @@ import {
 import { TodosService } from './todos.service';
 import { CreateTodoDto } from './dto/create-todo.dto';
 import { UpdateTodoDto } from './dto/update-todo.dto';
+import { plainToInstance } from 'class-transformer';
+import { ResponseTodoDto } from './dto/response-todo.dto';
 
 @Controller('todos')
 export class TodosController {
   constructor(private readonly todosService: TodosService) {}
 
   @Get()
-  findAll() {
-    return this.todosService.findAll();
+  async findAll() {
+    const todos = await this.todosService.findAll();
+
+    return plainToInstance(ResponseTodoDto, todos);
   }
 
   @Get(':id')
-  findOne(@Param('id', ParseIntPipe) id: string) {
-    return this.todosService.findOne(+id);
+  async findOne(@Param('id', ParseIntPipe) id: string) {
+    const todo = await this.todosService.findOne(+id);
+
+    return plainToInstance(ResponseTodoDto, todo);
   }
 
   @Post()

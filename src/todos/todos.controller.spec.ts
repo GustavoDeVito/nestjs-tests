@@ -4,6 +4,8 @@ import { TodosService } from './todos.service';
 import { CreateTodoDto } from './dto/create-todo.dto';
 import { UpdateTodoDto } from './dto/update-todo.dto';
 import { Todo } from '@prisma/client';
+import { ResponseTodoDto } from './dto/response-todo.dto';
+import { plainToInstance } from 'class-transformer';
 
 const mockTodos: Todo[] = [
   {
@@ -57,7 +59,10 @@ describe('TodosController', () => {
     it('should return an array of todos', async () => {
       jest.spyOn(service, 'findAll').mockResolvedValueOnce(mockTodos);
 
-      expect(await controller.findAll()).toBe(mockTodos);
+      const result = await controller.findAll();
+      const todos = plainToInstance(ResponseTodoDto, result);
+
+      expect(todos).toEqual(mockTodos);
     });
   });
 
@@ -65,13 +70,19 @@ describe('TodosController', () => {
     it('should return a todo when given a valid id', async () => {
       jest.spyOn(service, 'findOne').mockResolvedValueOnce(mockTodos[0]);
 
-      expect(await controller.findOne('1')).toBe(mockTodos[0]);
+      const result = await controller.findOne('1');
+      const todo = plainToInstance(ResponseTodoDto, result);
+
+      expect(todo).toEqual(mockTodos[0]);
     });
 
     it('should throw NotFoundException when given an invalid id', async () => {
       jest.spyOn(service, 'findOne').mockResolvedValueOnce(null);
 
-      expect(await controller.findOne('999')).toBeNull();
+      const result = await controller.findOne('999');
+      const todo = plainToInstance(ResponseTodoDto, result);
+
+      expect(todo).toBeNull();
     });
   });
 
